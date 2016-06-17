@@ -49,7 +49,7 @@ namespace CoursesFileSysOrg
         {
             get
             {
-                return @"https://www.udemy.com/api-2.0/courses/{id}/public-curriculum-items?page_size=100&fields[results]=@min";
+                return @"https://www.udemy.com/api-2.0/courses/{id}/public-curriculum-items?page={pagenum}&page_size=100&fields[results]=@min";
             }
         }
 
@@ -111,22 +111,31 @@ namespace CoursesFileSysOrg
 
         private void PopulateAllCourseItemsByJSON()
         {
-            string CurriculumPageJSON;
-            using (WebClient client = new WebClient())
-            {
-                CurriculumPageJSON = client.DownloadString(CourseIDItemsURL.Replace("{id}", Course.id));
-                int startIndex = CurriculumPageJSON.IndexOf("\"results\":") + 10;
-                CurriculumPageJSON = CurriculumPageJSON.Substring(startIndex, CurriculumPageJSON.Length - startIndex - 1);
-            }
+            List<UdemyCourseResult> udemyCourseResult = new List<UdemyCourseResult>();
+            bool nextPageExist = false;
+            int pageNum = 1;
 
-            List<UdemyCourseResult> udemyCourseResult;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(List<UdemyCourseResult>));
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(CurriculumPageJSON)))
+            do
             {
-                udemyCourseResult = serializer.ReadObject(ms) as List<UdemyCourseResult>;
+                string CurriculumPageJSON;
+                using (WebClient client = new WebClient())
+                {
+                    CurriculumPageJSON = client.DownloadString(CourseIDItemsURL.Replace("{id}", Course.id).Replace("{pagenum}",(pageNum++).ToString()));
+                    nextPageExist = (CurriculumPageJSON.IndexOf("\"next\": null") == -1);
+                    int startIndex = CurriculumPageJSON.IndexOf("\"results\":") + 10;
+                    CurriculumPageJSON = CurriculumPageJSON.Substring(startIndex, CurriculumPageJSON.Length - startIndex - 1);
+                }
+
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(List<UdemyCourseResult>));
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(CurriculumPageJSON)))
+                {
+                    udemyCourseResult.AddRange(serializer.ReadObject(ms) as List<UdemyCourseResult>);
+                }
             }
+            while (nextPageExist);
 
             int modelIndex = 0, localVideoIndex = 1, globalVideoIndex = 1;
+
             foreach (var item in udemyCourseResult)
             {
                 switch (item._class)

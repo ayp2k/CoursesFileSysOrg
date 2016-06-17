@@ -13,6 +13,7 @@ namespace CoursesFileSysOrg
 
         internal abstract string BaseURL { get; }
         internal abstract string SearchURL { get; }
+        internal abstract string RefererURL { get; }
         internal HtmlParser domParser = new HtmlParser();
         
         public abstract string Name { get; }
@@ -35,6 +36,7 @@ namespace CoursesFileSysOrg
                 case "infiniteskills":
                 case "o'reilly":
                 case "oreilly":
+                case "packtpub":
                     return new InfiniteSkills();
                 default:
                     return null;

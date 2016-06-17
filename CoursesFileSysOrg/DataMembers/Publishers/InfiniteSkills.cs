@@ -31,6 +31,14 @@ namespace CoursesFileSysOrg
             }
         }
 
+        internal override string RefererURL
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         private Chapter currChapter;
 
         internal override List<Course> SearchCourse(string courseName)

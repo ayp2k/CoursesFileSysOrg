@@ -72,6 +72,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -81,6 +82,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataMembers\APIresultData\UdemyCourseResult.cs" />
+    <Compile Include="DataMembers\APIresultData\UdemySearchResults.cs" />
     <Compile Include="DataMembers\Chapter.cs" />
     <Compile Include="DataMembers\Course.cs" />
     <Compile Include="DataMembers\Publishers\InfiniteSkills.cs" />

@@ -1,8 +1,12 @@
-﻿using System;
+﻿using CoursesFileSysOrg.DataMembers.APIresultData;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Web.Script.Serialization;
 
 
@@ -30,7 +34,7 @@ namespace CoursesFileSysOrg
         {
             get
             {
-                return @"https://sp10050dad.guided.ss-omtrdc.net/?q=" + QueryPlaceHolder + "&x10=categories&q10=course&m_Sort=relevance&m_Count=5";
+                return @"https://sp10050dad.guided.ss-omtrdc.net/?q=" + QueryPlaceHolder + "&x10=categories&q10=course&m_Sort=relevance&m_Count=10";
             }
         }
 
@@ -44,20 +48,28 @@ namespace CoursesFileSysOrg
 
         internal override List<Course> SearchCourse(string courseName)
         {
-            string SearchPageHTML;
+            string SearchPageJSON;
             List<Course> singleCourse = new List<Course>();
             List<Course> courses = new List<Course>();
             using (WebClient client = new WebClient())
             {
-                SearchPageHTML = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, courseName.Replace(' ', '+')));
+                SearchPageJSON = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
             }
-            ArrayList arr = (ArrayList)(new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(SearchPageHTML)["resultsets"]);
-            foreach (Dictionary<string, object> item in ((ArrayList)((Dictionary<string, object>)arr[0])["results"]))
+
+
+            PluralsightSearchResults pluralsightSearchResults;
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(PluralsightSearchResults));
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(SearchPageJSON)))
+            {
+                pluralsightSearchResults = serializer.ReadObject(ms) as PluralsightSearchResults;
+            }
+
+            foreach (var item in pluralsightSearchResults.resultsets[0].results)
             {
                 Course course = new Course();
-                //course.id = "0";
-                course.Name = item["title"].ToString();
-                course.URL = item["url"].ToString().Replace("index:", BaseURL).Replace("?key=", "/").ToLower();
+                course.id = item.prodId;
+                course.Name = item.title;
+                course.URL = item.url.Replace("index:", BaseURL).Replace("?key=", "/").ToLower();
                 if (course.Name.ToLower() == courseName.ToLower())
                 {
                     singleCourse.Add(course);
@@ -68,7 +80,26 @@ namespace CoursesFileSysOrg
                     courses.Add(course);
                 }
             }
+
             return courses;
+            
+            //ArrayList arr = (ArrayList)(new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(SearchPageJSON)["resultsets"]);
+            //foreach (Dictionary<string, object> item in ((ArrayList)((Dictionary<string, object>)arr[0])["results"]))
+            //{
+            //    Course course = new Course();
+            //    //course.id = "0";
+            //    course.Name = item["title"].ToString();
+            //    course.URL = item["url"].ToString().Replace("index:", BaseURL).Replace("?key=", "/").ToLower();
+            //    if (course.Name.ToLower() == courseName.ToLower())
+            //    {
+            //        singleCourse.Add(course);
+            //        return singleCourse;
+            //    }
+            //    else
+            //    {
+            //        courses.Add(course);
+            //    }
+            //}
         }
 
         internal override void PopulateAllCourseItems()

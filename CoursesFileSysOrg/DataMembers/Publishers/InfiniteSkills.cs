@@ -50,7 +50,7 @@ namespace CoursesFileSysOrg
 
             using (WebClient client = new WebClient())
             {
-                string postParameters = "keywordsearch=" + courseName.Replace(' ', '+') + "&x=25&y=25";
+                string postParameters = "keywordsearch=" + WebUtility.UrlEncode(courseName) + "&x=25&y=25";
                 client.Headers[HttpRequestHeader.ContentType] = ContentTypePost;
                 //client.Headers[HttpRequestHeader.UserAgent] = UserAgent;
                 //client.Headers[HttpRequestHeader.Referer] = BaseURL;

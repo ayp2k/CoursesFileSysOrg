@@ -36,7 +36,6 @@ namespace CoursesFileSysOrg
                 case "infiniteskills":
                 case "o'reilly":
                 case "oreilly":
-                case "packtpub":
                     return new InfiniteSkills();
                 default:
                     return null;

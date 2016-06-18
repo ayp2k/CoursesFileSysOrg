@@ -82,6 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataMembers\APIresultData\PluralsightSearchResults.cs" />
     <Compile Include="DataMembers\APIresultData\UdemyCourseResult.cs" />
     <Compile Include="DataMembers\APIresultData\UdemySearchResults.cs" />
     <Compile Include="DataMembers\Chapter.cs" />

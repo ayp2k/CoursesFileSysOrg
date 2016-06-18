@@ -49,6 +49,7 @@ namespace CoursesFileSysOrg
         {
             get
             {
+                // can even use page_size=9999 without paging....
                 return @"https://www.udemy.com/api-2.0/courses/{id}/public-curriculum-items?page={pagenum}&page_size=100&fields[results]=@min";
             }
         }
@@ -64,8 +65,8 @@ namespace CoursesFileSysOrg
 
             using (WebClient client = new WebClient())
             {
-                client.Headers.Add(HttpRequestHeader.Referer, RefererURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName.Replace(' ', '+'))));
-                SearchPageJSON = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName.Replace(' ', '+'))));
+                client.Headers.Add(HttpRequestHeader.Referer, RefererURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageJSON = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
                 int startIndex = SearchPageJSON.IndexOf("\"courses\":") + 10;
                 int endIndex = SearchPageJSON.IndexOf(", \"pagination\":");
                 SearchPageJSON = SearchPageJSON.Substring(startIndex, endIndex - startIndex);

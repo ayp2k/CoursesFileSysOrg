@@ -51,7 +51,7 @@ namespace CoursesFileSysOrg
             using (WebClient client = new WebClient())
             {
                 //client.Headers["User-Agent"] = UserAgent;
-                SearchPageHTML = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName.Replace(' ', '+'))));
+                SearchPageHTML = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
             }
             var domDoc = domParser.Parse(SearchPageHTML);
             domItem = domDoc.QuerySelector("ul.course-list");

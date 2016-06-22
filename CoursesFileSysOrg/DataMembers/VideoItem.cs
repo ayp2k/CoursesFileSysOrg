@@ -13,16 +13,13 @@ namespace CoursesFileSysOrg
         {
             get
             {
-                return string.Format("{0:00} {1}", this.localIndex, this.Name);
+                return string.Format("{0:D2} {1}", this.localIndex, this.Name);
             }
         }
 
-        public string GetFormatedFileName
+        public string GetFormatedFileName(int width)
         {
-            get
-            {
-                return string.Format("{0:00}. {1}", this.globalIndex, this.Name.Replace("?", "").Replace("\"", "“").CleanUpFileName());
-            }
+            return string.Format("{0:D" + width.ToString() + "}. {1}", this.globalIndex, this.Name.Replace("?", "").Replace("\"", "“").CleanUpFileName());
         }
 
         public string TimeStamp { get; internal set; }

@@ -122,10 +122,10 @@ namespace CoursesFileSysOrg
                         foreach (var chapter in course.Chapters)
                         {
                             Console.WriteLine();
-                            Console.WriteLine("{0}", chapter.GetFormatedName);
+                            Console.WriteLine("{0}", chapter.GetFormatedName(course.GetChaptersNumOfDigits));
                             foreach (var videoitem in chapter.VideoItems)
                             {
-                                Console.WriteLine("{0:00} » [{3,7}] » {1:0}.{2}", videoitem.globalIndex, chapter.id, videoitem.GetFormatedName, videoitem.TimeStamp );
+                                Console.WriteLine("{0:D" + course.GetVideoItemsNumOfDigits.ToString() + "} » [{3,7}] » {1:D2}.{2:D2}", videoitem.globalIndex, chapter.id, videoitem.GetFormatedName, videoitem.TimeStamp );
                             }
                         }
                         break;
@@ -134,14 +134,14 @@ namespace CoursesFileSysOrg
                         foreach (var chapter in course.Chapters)
                         {
                             //string folderName = string.Format("{0}", chapter.GetFormatedFolderName);
-                            if (!Directory.Exists(chapter.GetFormatedFolderName))
+                            if (!Directory.Exists(chapter.GetFormatedFolderName(course.GetChaptersNumOfDigits)))
                             {
-                                Directory.CreateDirectory(chapter.GetFormatedFolderName);
-                                Console.WriteLine("\"{0}\" Foder Created", chapter.GetFormatedFolderName);
+                                Directory.CreateDirectory(chapter.GetFormatedFolderName(course.GetChaptersNumOfDigits));
+                                Console.WriteLine("\"{0}\" Foder Created", chapter.GetFormatedFolderName(course.GetChaptersNumOfDigits));
                             }
                             else // already exist
                             {
-                                Console.WriteLine("\"{0}\" Folder Already Exist", chapter.GetFormatedFolderName);
+                                Console.WriteLine("\"{0}\" Folder Already Exist", chapter.GetFormatedFolderName(course.GetChaptersNumOfDigits));
                             }
                         }
                         break;
@@ -149,14 +149,14 @@ namespace CoursesFileSysOrg
                         // Rename Video Files 
                         var searchLocation = SearchOption.TopDirectoryOnly;
                         DirectoryInfo currentDirectory = new DirectoryInfo(Environment.CurrentDirectory);
-                        var origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => f.Name)
+                        var origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => f.Name.GetNumericIndex())
                             .Where(f=> f.Extension.ToLower() == ".mp4" 
                                     || f.Extension.ToLower() == ".mov"
                                     || f.Extension.ToLower() == ".flv").ToArray();
                         if (origenalFilesNames.Length == 0)
                         {
                             searchLocation = SearchOption.AllDirectories;
-                            origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => f.Name)
+                            origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => f.Name.GetNumericIndex())
                                 .Where(f => f.Extension.ToLower() == ".mp4"
                                     || f.Extension.ToLower() == ".mov"
                                     || f.Extension.ToLower() == ".flv").ToArray();
@@ -164,9 +164,9 @@ namespace CoursesFileSysOrg
 
                         var newFilesNames = course.Chapters.SelectMany(
                             x => x.VideoItems, (i, j) => new {
-                                folderid = i.id, folderName = i.Name , formatedFolderName = i.GetFormatedFolderName,
+                                folderid = i.id, folderName = i.Name , formatedFolderName = i.GetFormatedFolderName(course.GetChaptersNumOfDigits),
                                 videoName = j.Name, videoLocalIndex = j.localIndex, videoGlobalIndex = j.globalIndex,
-                                videoFormatedFileName = j.GetFormatedFileName, j.IsVideo
+                                videoFormatedFileName = j.GetFormatedFileName(course.GetVideoItemsNumOfDigits), j.IsVideo
                             }).Where(x => x.IsVideo == true).ToArray();
 
                         if (origenalFilesNames.Length == newFilesNames.Length)

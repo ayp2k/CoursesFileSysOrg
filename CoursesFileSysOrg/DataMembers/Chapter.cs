@@ -10,20 +10,14 @@ namespace CoursesFileSysOrg
         public string Name { get; set; }
         public List<VideoItem> VideoItems { get; set; }
 
-        public string GetFormatedName
+        public string GetFormatedName(int width)
         {
-            get
-            {
-                return string.Format("{0:00}. {1}", this.id, this.Name);
-            }
+            return string.Format("{0:00}. {1}", this.id, this.Name);
         }
 
-        public string GetFormatedFolderName
+        public string GetFormatedFolderName(int width)
         {
-            get
-            {
-                return string.Format("{0}. {1}", this.id, this.Name.Replace("?", "").Replace("\"", "“").CleanUpFileName());
-            }
+            return string.Format("{0:D" + width.ToString() + "}. {1}", this.id, this.Name.Replace("?", "").Replace("\"", "“").CleanUpFileName());
         }
 
         public string TimeStamp { get; internal set; }

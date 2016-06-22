@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Linq;
 
 namespace CoursesFileSysOrg
 {
@@ -28,6 +29,40 @@ namespace CoursesFileSysOrg
                 if (this.webPageHTML == null || this.webPageHTML == string.Empty)
                     GetCourseWebPage();
                 return this.webPageHTML;
+            }
+        }
+
+        public int GetChaptersCount
+        {
+            get
+            {
+                return Chapters.Count;
+            }
+        }
+
+        public int GetChaptersNumOfDigits
+        {
+            //int width = (files.Count + 1).ToString("d").Length;
+            //string formatString = "{0:D" + width + "}_{1}.xxx";
+            get
+            {
+                return GetChaptersCount.ToString().Length;
+            }
+        }
+
+        public int GetVideoItemsCount
+        {
+            get
+            {
+                return Chapters.Sum(i => i.VideoItems.Count);
+            }
+        }
+
+        public int GetVideoItemsNumOfDigits
+        {
+            get
+            {
+                return GetVideoItemsCount.ToString().Length;
             }
         }
 

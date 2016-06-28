@@ -21,14 +21,22 @@ namespace CoursesFileSysOrg
             return Path.GetInvalidPathChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), "-"));
         }
 
-        public static int GetNumericIndex(this string name)
+        public static double GetNumericIndex(this string name)
         {
-            int result;
-            foreach (var x in name.Split(new char[] { ' ', '_', '-', '.' }))
+            double result;
+            List<double> subResults = new List<double>();
+
+            foreach (var subName in name.Split(new char[] { ' ', '_', '-', '.' }))
             {
-                if (int.TryParse(x, out result)) return result;
+                if (double.TryParse(subName, out result))
+                {
+                    //return result;
+                    subResults.Add(result);
+                }
             }
-            return 0;
+            if (subResults.Count > 0)
+                return double.Parse(subResults[0].ToString() + '.' + string.Join("", subResults.Skip(1)));
+            return 1;
         }
 
         public static string SerializeJSON<T>(this T obj)

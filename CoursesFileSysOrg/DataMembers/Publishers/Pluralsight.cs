@@ -138,7 +138,14 @@ namespace CoursesFileSysOrg
 
         internal override string GetCourseMetaDataDescription()
         {
-            return string.Empty;
+            List<string> elements = new List<string>();
+            var domDoc = domParser.Parse(Course.GetWebPageHTML);
+            var element = domDoc.QuerySelector("div.text-component");
+            elements.Add(WebUtility.UrlDecode(element.InnerHtml));
+            elements.Add(Environment.NewLine);
+            element = domDoc.QuerySelector("div#tab-description");
+            elements.Add(WebUtility.UrlDecode(element.TextContent));
+            return string.Join(Environment.NewLine, elements);
         }
 
         internal override List<string> GetCourseMetaDataCategories()

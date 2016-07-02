@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -113,6 +114,7 @@ namespace CoursesFileSysOrg
                 Console.WriteLine("3. Rename & Move Video Files");
                 Console.WriteLine("4. Move Files to Folders");
                 Console.WriteLine("5. Print Metadata");
+                Console.WriteLine("6. Open Course Page in Browser");
                 Console.WriteLine("0. Exit");
                 Console.WriteLine();
 
@@ -141,6 +143,10 @@ namespace CoursesFileSysOrg
                     case '5':
                         // Display Metadata ...
                         DisplayMetadata(course);
+                        break;
+                    case '6':
+                        // open course page in browser
+                        OpenCourseInBrowser(course);
                         break;
                     default:
                         Console.WriteLine("option not supported!");
@@ -267,5 +273,13 @@ namespace CoursesFileSysOrg
                 Console.WriteLine("");
             }
         }
+
+        private static void OpenCourseInBrowser(Course course)
+        {
+            //ProcessStartInfo browserStart = new ProcessStartInfo();
+            //browserStart.Arguments = course.URL;
+            Process.Start(course.URL);
+        }
+
     }
 }

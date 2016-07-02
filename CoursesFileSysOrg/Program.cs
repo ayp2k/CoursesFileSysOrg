@@ -64,34 +64,40 @@ namespace CoursesFileSysOrg
             Course course = new Course();
 
             List<Course> courseSearchResults = publisher.SearchCourse(queryCourseName);
-            if (courseSearchResults.Count == 1)
+            switch (courseSearchResults.Count)
             {
-                course = courseSearchResults[0];
-            }
-            else if (courseSearchResults.Count > 1)
-            {
-                int indexer = 0;
-                Console.WriteLine();
-                Console.WriteLine("Please choose relevant course OR '0' to exit");
-                foreach (Course item in courseSearchResults)
-                {
-                    Console.WriteLine("({0}) - \"{1}\"", ++indexer, item.Name);
-                }
-                keyPressed = Console.ReadKey();
-                Console.WriteLine();
-                if (keyPressed.KeyChar == '0')
+                case 0:
+                    Console.WriteLine("Course name:\"{0}\" not found @ {1} web site!", queryCourseName, queryPublisherName);
                     Environment.Exit(0);
-                else if (keyPressed.KeyChar > '0' && Convert.ToInt32(keyPressed.KeyChar.ToString()) <= (courseSearchResults.Count))
-                {
-                    course = courseSearchResults[Convert.ToInt16(keyPressed.KeyChar.ToString()) - 1];
-                }
-                else
-                { 
-                    Console.WriteLine("Unrecognized option keypress");
-                    Environment.Exit(0);
-                }
+                    break;
+                case 1:
+                    course = courseSearchResults[0];
+                    break;
+                default: //(courseSearchResults.Count > 1)
+                    {
+                        int indexer = 0;
+                        Console.WriteLine();
+                        Console.WriteLine("Please choose relevant course OR '0' to exit");
+                        foreach (Course item in courseSearchResults)
+                        {
+                            Console.WriteLine("({0}) - \"{1}\"", ++indexer, item.Name);
+                        }
+                        keyPressed = Console.ReadKey();
+                        Console.WriteLine();
+                        if (keyPressed.KeyChar == '0')
+                            Environment.Exit(0);
+                        else if (keyPressed.KeyChar > '0' && Convert.ToInt32(keyPressed.KeyChar.ToString()) <= (courseSearchResults.Count))
+                        {
+                            course = courseSearchResults[Convert.ToInt16(keyPressed.KeyChar.ToString()) - 1];
+                        }
+                        else
+                        {
+                            Console.WriteLine("Unrecognized option keypress");
+                            Environment.Exit(0);
+                        }
+                    }
+                    break;
             }
-
             publisher.Course = course;
             Console.WriteLine("...Processing course name: \"{0}\" @ \"{1}\"", publisher.Course.Name, publisher.Name);
             //publisher.Course.GetCourseWebPage();
@@ -182,6 +188,7 @@ namespace CoursesFileSysOrg
             var origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => f.Name.GetNumericIndex())
                 .Where(f => f.Extension.ToLower() == ".mp4"
                         || f.Extension.ToLower() == ".mov"
+                        || f.Extension.ToLower() == ".wmv"
                         || f.Extension.ToLower() == ".flv").ToArray();
             if (origenalFilesNames.Length == 0)
             {
@@ -189,6 +196,7 @@ namespace CoursesFileSysOrg
                 origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation).OrderBy(f => (f.Name.GetNumericIndex() + (f.Directory.Name.GetNumericIndex() * 1000)))
                     .Where(f => f.Extension.ToLower() == ".mp4"
                         || f.Extension.ToLower() == ".mov"
+                        || f.Extension.ToLower() == ".wmv"
                         || f.Extension.ToLower() == ".flv").ToArray();
             }
 
@@ -227,13 +235,14 @@ namespace CoursesFileSysOrg
                 if (getConfirmationKey.KeyChar == 13 || getConfirmationKey.KeyChar.ToString().ToLower() == "y")
                 {
                     Console.WriteLine("Renaming...");
+                    Console.WriteLine(" » (id):new name");
                     for (int j = 0; j < origenalFilesNames.Length; j++)
                     {
                         var fullFilePath = origenalFilesNames[j].DirectoryName + "\\";
                         if (searchLocation == SearchOption.TopDirectoryOnly)
                             fullFilePath += newFilesNames[j].formatedFolderName + "\\";
 
-                        Console.WriteLine(" » new {0,3} name: {1}{2}{3}", j + 1,
+                        Console.WriteLine(" » {0,3}: {1}{2}{3}", j + 1,
                         fullFilePath, newFilesNames[j].videoFormatedFileName, origenalFilesNames[j].Extension);
 
                         origenalFilesNames[j].MoveTo(string.Format("{0}{1}{2}",

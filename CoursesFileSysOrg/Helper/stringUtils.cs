@@ -24,18 +24,18 @@ namespace CoursesFileSysOrg
         public static double GetNumericIndex(this string name)
         {
             double result;
-            List<double> subResults = new List<double>();
+            List<string> subResults = new List<string>();
 
-            foreach (var subName in name.Split(new char[] { ' ', '_', '-', '.' }))
+            foreach (var subName in name.Split(new char[] { ' ', '_', '-', '.', '(', ')' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if (double.TryParse(subName, out result))
                 {
                     //return result;
-                    subResults.Add(result);
+                    subResults.Add(subName);
                 }
             }
             if (subResults.Count > 0)
-                return double.Parse(subResults[0].ToString() + '.' + string.Join("", subResults.Skip(1)));
+                return double.Parse(subResults[0] + '.' + string.Join("", subResults.Skip(1)));
             return 1;
         }
 

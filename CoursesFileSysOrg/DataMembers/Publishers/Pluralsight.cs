@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
 
@@ -34,7 +35,7 @@ namespace CoursesFileSysOrg
         {
             get
             {
-                return @"https://sp10050dad.guided.ss-omtrdc.net/?q=" + QueryPlaceHolder + "&x10=categories&q10=course&m_Sort=relevance&m_Count=10";
+                return @"https://sp10050dad.guided.ss-omtrdc.net/?q=" + QueryPlaceHolder + "&x10=categories&q10=course&m_Sort=relevance&m_Count=" + SearchResultsCount;
             }
         }
 
@@ -46,20 +47,27 @@ namespace CoursesFileSysOrg
             }
         }
 
-        internal override List<Course> SearchCourse(string courseName)
+        public int SearchResultsCount { get; set; }
+
+        public Pluralsight()
+        {
+            this.SearchResultsCount = 25;
+        }
+
+        internal async override Task<List<Course>> SearchCourse(string courseName)
         {
             string SearchPageJSON;
             List<Course> singleCourse = new List<Course>();
             List<Course> courses = new List<Course>();
             using (WebClient client = new WebClient())
             {
-                SearchPageJSON = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageJSON = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
             }
 
 
             PluralsightSearchResults pluralsightSearchResults;
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(PluralsightSearchResults));
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(SearchPageJSON)))
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(SearchPageJSON)))
             {
                 pluralsightSearchResults = serializer.ReadObject(ms) as PluralsightSearchResults;
             }
@@ -68,9 +76,9 @@ namespace CoursesFileSysOrg
             {
                 Course course = new Course();
                 course.id = item.prodId;
-                course.Name = item.title;
+                course.Name = WebUtility.HtmlDecode(item.title); //Encoding.UTF8.GetString(Encoding.Default.GetBytes(item.title));
                 course.URL = item.url.Replace("index:", BaseURL).Replace("?key=", "/").ToLower();
-                if (course.Name.ToLower() == courseName.ToLower())
+                if (course.Name.StripNonAlphaNumeric().ToLower() == courseName.StripNonAlphaNumeric().ToLower())
                 {
                     singleCourse.Add(course);
                     return singleCourse;

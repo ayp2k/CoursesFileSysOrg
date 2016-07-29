@@ -5,12 +5,19 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
     static class StringUtils
     {
+        public static string StripNonAlphaNumeric(this string str)
+        {
+            Regex regex = new Regex("[^a-zA-Z0-9 ]");
+            return regex.Replace(str, "");
+        }
+
         public static string CleanUpFileName(this string fileName)
         {
             return Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), "-"));

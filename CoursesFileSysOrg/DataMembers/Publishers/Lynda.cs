@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
@@ -41,7 +42,7 @@ namespace CoursesFileSysOrg
 
         private Chapter currChapter;
 
-        internal override List<Course> SearchCourse(string courseName)
+        internal async override Task<List<Course>> SearchCourse(string courseName)
         {
             string SearchPageHTML;
             IElement domItem;
@@ -51,7 +52,7 @@ namespace CoursesFileSysOrg
             using (WebClient client = new WebClient())
             {
                 //client.Headers["User-Agent"] = UserAgent;
-                SearchPageHTML = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageHTML = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
             }
             var domDoc = domParser.Parse(SearchPageHTML);
             domItem = domDoc.QuerySelector("ul.course-list");
@@ -63,7 +64,7 @@ namespace CoursesFileSysOrg
                 course.Name = item.FirstElementChild.TextContent.Trim();
                 course.URL = item.FirstElementChild.Attributes["href"].Value.Split(new char[] { '?' })[0];
 
-                if (course.Name.ToLower() == courseName.ToLower())
+                if (course.Name.StripNonAlphaNumeric().ToLower() == courseName.StripNonAlphaNumeric().ToLower())
                 {
                     singleCourse.Add(course);
                     return singleCourse;

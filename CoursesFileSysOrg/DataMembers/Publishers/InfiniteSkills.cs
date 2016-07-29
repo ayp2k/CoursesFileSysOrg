@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
@@ -41,7 +42,7 @@ namespace CoursesFileSysOrg
 
         private Chapter currChapter;
 
-        internal override List<Course> SearchCourse(string courseName)
+        internal async override Task<List<Course>> SearchCourse(string courseName)
         {
             IElement domItem;
             string SearchPageHTML;
@@ -54,7 +55,7 @@ namespace CoursesFileSysOrg
                 client.Headers[HttpRequestHeader.ContentType] = ContentTypePost;
                 //client.Headers[HttpRequestHeader.UserAgent] = UserAgent;
                 //client.Headers[HttpRequestHeader.Referer] = BaseURL;
-                SearchPageHTML = client.UploadString(this.SearchURL, postParameters);
+                SearchPageHTML = await client.UploadStringTaskAsync(this.SearchURL, postParameters);
             }
             var domDoc = domParser.Parse(SearchPageHTML);
             domItem = domDoc.QuerySelector("section.category-product-wrapper");
@@ -66,7 +67,7 @@ namespace CoursesFileSysOrg
                 course.Name = item.QuerySelector("h2").TextContent;
                 course.URL = this.BaseURL + item.Attributes["href"].Value;
 
-                if (course.Name.ToLower() == courseName.ToLower())
+                if (course.Name.StripNonAlphaNumeric().ToLower() == courseName.StripNonAlphaNumeric().ToLower())
                 {
                     singleCourse.Add(course);
                     return singleCourse;

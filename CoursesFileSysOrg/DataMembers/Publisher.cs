@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
+using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
@@ -24,6 +25,11 @@ namespace CoursesFileSysOrg
             switch (publisherName.ToLower())
             {
                 case "pluralsight":
+                case "frontend masters":
+                case "frontendmasters":
+                case "digital tutors":
+                case "digital-tutors":
+                case "digitaltutors":
                     return new Pluralsight();
                 case "lynda":
                     return new Lynda();
@@ -34,6 +40,7 @@ namespace CoursesFileSysOrg
                 case "envato":
                     return new TutsPlus();
                 case "infiniteskills":
+                case "infinite skills":
                 case "o'reilly":
                 case "oreilly":
                     return new InfiniteSkills();
@@ -42,7 +49,7 @@ namespace CoursesFileSysOrg
             }
         }
 
-        internal abstract List<Course> SearchCourse(string courseName);
+        internal abstract Task<List<Course>> SearchCourse(string courseName);
         internal abstract void PopulateAllCourseItems();
 
         internal abstract string GetCourseMetaDataDescription();

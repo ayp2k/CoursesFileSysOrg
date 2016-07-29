@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -30,6 +31,7 @@ namespace CoursesFileSysOrg.DataMembers.APIresultData
         public string currency_symbol { get; set; }
     }
 
+    [DebuggerDisplay("{id}", Name = "{title}")]
     [DataContract]
     class UdemySearchResults
     {

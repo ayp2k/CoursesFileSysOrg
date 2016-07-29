@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using CoursesFileSysOrg.DataMembers.APIresultData;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
@@ -56,7 +57,7 @@ namespace CoursesFileSysOrg
 
         private Chapter currChapter;
 
-        internal override List<Course> SearchCourse(string courseName)
+        internal async override Task<List<Course>> SearchCourse(string courseName)
         {
             string SearchPageJSON;
             //IElement domItem;
@@ -66,7 +67,7 @@ namespace CoursesFileSysOrg
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add(HttpRequestHeader.Referer, RefererURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
-                SearchPageJSON = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageJSON = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
                 int startIndex = SearchPageJSON.IndexOf("\"courses\":") + 10;
                 int endIndex = SearchPageJSON.IndexOf(", \"pagination\":");
                 SearchPageJSON = SearchPageJSON.Substring(startIndex, endIndex - startIndex);
@@ -89,10 +90,10 @@ namespace CoursesFileSysOrg
                 //course.Name = item.QuerySelector(".title.bold.fs15-force.ng-binding").TextContent.Trim();
                 //course.URL = this.BaseURL + item.QuerySelector(".course-box-flat.pr0-force-xs.pl0-force-xs a").Attributes["href"].Value;
                 course.id = item.id.ToString();
-                course.Name = item.title;
+                course.Name = item.title.Trim();
                 course.URL = this.BaseURL + item.url;
 
-                if (course.Name.ToLower() == courseName.ToLower())
+                if (course.Name.StripNonAlphaNumeric().ToLower() == courseName.StripNonAlphaNumeric().ToLower())
                 {
                     singleCourse.Add(course);
                     return singleCourse;
@@ -110,7 +111,7 @@ namespace CoursesFileSysOrg
             PopulateAllCourseItemsByJSON();
         }
 
-        private void PopulateAllCourseItemsByJSON()
+        private async void PopulateAllCourseItemsByJSON()
         {
             List<UdemyCourseResult> udemyCourseResult = new List<UdemyCourseResult>();
             bool nextPageExist = false;
@@ -121,7 +122,7 @@ namespace CoursesFileSysOrg
                 string CurriculumPageJSON;
                 using (WebClient client = new WebClient())
                 {
-                    CurriculumPageJSON = client.DownloadString(CourseIDItemsURL.Replace("{id}", Course.id).Replace("{pagenum}",(pageNum++).ToString()));
+                    CurriculumPageJSON = await client.DownloadStringTaskAsync(CourseIDItemsURL.Replace("{id}", Course.id).Replace("{pagenum}",(pageNum++).ToString()));
                     nextPageExist = (CurriculumPageJSON.IndexOf("\"next\": null") == -1);
                     int startIndex = CurriculumPageJSON.IndexOf("\"results\":") + 10;
                     CurriculumPageJSON = CurriculumPageJSON.Substring(startIndex, CurriculumPageJSON.Length - startIndex - 1);

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace CoursesFileSysOrg
 {
@@ -41,7 +42,7 @@ namespace CoursesFileSysOrg
 
         private Chapter currChapter;
 
-        internal override List<Course> SearchCourse(string courseName)
+        internal async override Task<List<Course>> SearchCourse(string courseName)
         {
             string SearchPageHTML;
             IElement domItem;
@@ -52,26 +53,29 @@ namespace CoursesFileSysOrg
             {
                 client.Headers["User-Agent"] = UserAgent;
                 //client.Headers.Add(HttpRequestHeader.Cookie, "__cfduid");
-                SearchPageHTML = client.DownloadString(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageHTML = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
             }
             var domDoc = domParser.Parse(SearchPageHTML);
             domItem = domDoc.QuerySelector(".posts");
 
-            foreach (var item in domItem.Children)
+            if (domItem != null)
             {
-                Course course = new Course();
-                //course.id = "0";
-                course.Name = item.QuerySelector(".posts__post-title").TextContent.Trim();
-                course.URL = item.QuerySelector(".posts__post-title").Attributes["href"].Value;
+                foreach (var item in domItem.Children)
+                {
+                    Course course = new Course();
+                    //course.id = "0";
+                    course.Name = item.QuerySelector(".posts__post-title").TextContent.Trim();
+                    course.URL = item.QuerySelector(".posts__post-title").Attributes["href"].Value;
 
-                if (course.Name.ToLower() == courseName.ToLower())
-                {
-                    singleCourse.Add(course);
-                    return singleCourse;
-                }
-                else
-                {
-                    courses.Add(course);
+                    if (course.Name.StripNonAlphaNumeric().ToLower() == courseName.StripNonAlphaNumeric().ToLower())
+                    {
+                        singleCourse.Add(course);
+                        return singleCourse;
+                    }
+                    else
+                    {
+                        courses.Add(course);
+                    }
                 }
             }
             return courses;
@@ -92,7 +96,7 @@ namespace CoursesFileSysOrg
             foreach (var node in elements.QuerySelectorAll("h3"))
 
             {
-                var videoName = node.QuerySelector(".lesson-index__lesson-title").TextContent;
+                var videoName = node.QuerySelector(".lesson-index__lesson-title").TextContent.Trim();
                 var videoIndex = node.QuerySelector(".lesson-index__lesson-number").TextContent.Split(new char[] { '.' });
                 modelIndex = Convert.ToInt32(videoIndex[0]);
                 localVideoIndex = Convert.ToInt32(videoIndex[1]);

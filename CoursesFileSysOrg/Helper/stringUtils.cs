@@ -12,6 +12,22 @@ namespace CoursesFileSysOrg
 {
     static class StringUtils
     {
+        public static string GetSeconds(this string timeStamp)
+        {
+            string[] subStrings = timeStamp.Split(new char[] { ' ', ':' });
+            if (subStrings.Length > 1)
+                return subStrings[1].TrimStart(new char[] { '0' }).TrimEnd(new char[] { 's' });
+            else
+                return subStrings[0].TrimStart(new char[] { '0' }).TrimEnd(new char[] { 's' });
+        }
+
+        public static string GetMinutes(this string timeStamp)
+        {
+            string[] subStrings = timeStamp.Split(new char[] { ' ', ':' });
+            var subString = subStrings[0];
+            return (subStrings.Length > 1) ? subString.TrimStart(new char[] { '0' }).TrimEnd(new char[] { 'm' }) : string.Empty;
+        }
+
         public static string StripNonAlphaNumeric(this string str)
         {
             Regex regex = new Regex("[^a-zA-Z0-9 ]");

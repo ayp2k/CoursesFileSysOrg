@@ -44,6 +44,11 @@ namespace CoursesFileSysOrg
                 case "o'reilly":
                 case "oreilly":
                     return new InfiniteSkills();
+                case "livelessons":
+                case "prentice hall":
+                case "prenticehall":
+                case "informit":
+                    return new LiveLessons();
                 default:
                     return null;
             }

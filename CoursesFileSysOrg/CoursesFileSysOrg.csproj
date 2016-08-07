@@ -90,14 +90,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Application.cs" />
     <Compile Include="DataMembers\APIresultData\PluralsightSearchResults.cs" />
     <Compile Include="DataMembers\APIresultData\UdemyCourseResult.cs" />
     <Compile Include="DataMembers\APIresultData\UdemySearchResults.cs" />
     <Compile Include="DataMembers\Chapter.cs" />
     <Compile Include="DataMembers\Course.cs" />
     <Compile Include="DataMembers\Publishers\InfiniteSkills.cs" />
+    <Compile Include="DataMembers\Publishers\LiveLessons.cs" />
     <Compile Include="DataMembers\Publishers\Lynda.cs" />
     <Compile Include="DataMembers\Publishers\Pluralsight.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataMembers\Publisher.cs" />

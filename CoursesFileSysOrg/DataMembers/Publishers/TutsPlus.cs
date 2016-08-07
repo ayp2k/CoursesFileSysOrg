@@ -53,7 +53,8 @@ namespace CoursesFileSysOrg
             {
                 client.Headers["User-Agent"] = UserAgent;
                 //client.Headers.Add(HttpRequestHeader.Cookie, "__cfduid");
-                SearchPageHTML = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName)));
+                SearchPageHTML = await client.DownloadStringTaskAsync(SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName.Replace('.',' '))));
+                //                                                                                                      this is a bug in the tuts+ search engine
             }
             var domDoc = domParser.Parse(SearchPageHTML);
             domItem = domDoc.QuerySelector(".posts");

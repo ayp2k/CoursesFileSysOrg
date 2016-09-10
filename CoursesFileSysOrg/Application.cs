@@ -10,7 +10,7 @@ namespace CoursesFileSysOrg
 {
     static class Application
     {
-        private static List<string> fileExtensions = new List<string>() { ".mp4", ".mov", ".wmv", ".flv", ".f4v", ".m4a" };
+        private static string[] fileExtensions = new string[] { ".mp4", ".mov", ".wmv", ".flv", ".f4v", ".m4a" };
 
         public static string WorkingDirectory { get; set; }
 
@@ -59,32 +59,33 @@ namespace CoursesFileSysOrg
 
         public static void FilesRenameAndMoveByNumericIndex(Course course)
         {
-            var searchLocation = SearchOption.TopDirectoryOnly;
             DirectoryInfo currentDirectory = new DirectoryInfo(GetWorkingDirectory());
-            var origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation)
-                .Where(e => fileExtensions.Contains(e.Extension.ToLower()))
-                .OrderBy(f => f.Name.GetNumericIndex())
-                .ToArray();
+            SearchOption searchLocation = SearchOption.TopDirectoryOnly;
+            FileInfo[] origenalFilesNames;
+
+            origenalFilesNames = Application.GetFilesinFolder(currentDirectory,
+                                                searchLocation, 
+                                                fileExtensions, 
+                                                f => f.Name.GetNumericIndex());
             if (origenalFilesNames.Length == 0)
             {
                 searchLocation = SearchOption.AllDirectories;
-                origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation)
-                    .Where(e => fileExtensions.Contains(e.Extension.ToLower()))
-                    .OrderBy(f => (f.Name.GetNumericIndex() + (f.Directory.Name.GetNumericIndex() * 1000)))
-                    .ToArray();
+                origenalFilesNames = Application.GetFilesinFolder(currentDirectory,
+                                                searchLocation, 
+                                                fileExtensions,
+                                                f => (f.Name.GetNumericIndex() + (f.Directory.Name.GetNumericIndex() * 1000)));
             }
-
             var newFilesNames = course.Chapters.SelectMany(
-                x => x.VideoItems, (i, j) => new
+                x => x.VideoItems, (chapter, videoitem) => new
                 {
-                    folderid = i.id,
-                    folderName = i.Name,
-                    formatedFolderName = i.GetFormatedFolderName(course.GetChaptersNumOfDigits),
-                    videoName = j.Name,
-                    videoLocalIndex = j.localIndex,
-                    videoGlobalIndex = j.globalIndex,
-                    videoFormatedFileName = j.GetFormatedFileName(course.GetVideoItemsNumOfDigits),
-                    j.IsVideo
+                    folderid = chapter.id,
+                    folderName = chapter.Name,
+                    formatedFolderName = chapter.GetFormatedFolderName(course.GetChaptersNumOfDigits),
+                    videoName = videoitem.Name,
+                    videoLocalIndex = videoitem.localIndex,
+                    videoGlobalIndex = videoitem.globalIndex,
+                    videoFormatedFileName = videoitem.GetFormatedFileName(course.GetVideoItemsNumOfDigits),
+                    videoitem.IsVideo
                 }).Where(x => x.IsVideo == true).ToArray();
 
             if (origenalFilesNames.Length == newFilesNames.Length)
@@ -103,8 +104,6 @@ namespace CoursesFileSysOrg
                         Console.WriteLine();
                         folderIndex++;
                     }
-                    //Console.WriteLine("Renaming file: \t\"{0,-80}\" to: \t\"{1}{2}\"", origenalFilesNames[i].Name,
-                    //    newFilesNames[i].videoFormatedFileName, origenalFilesNames[i].Extension);
                     Console.WriteLine("\"{0}\"{1," + (fromLength - origenalFilesNames[i].Name.Length).ToString() + "} \"{2}{3}\"",
                         origenalFilesNames[i].Name,
                         string.Empty,
@@ -112,9 +111,16 @@ namespace CoursesFileSysOrg
                 }
                 Console.WriteLine("Continue... (Y/n)");
                 var getConfirmationKey = Console.ReadKey();
+
                 Console.WriteLine();
                 if (getConfirmationKey.KeyChar == 13 || getConfirmationKey.KeyChar.ToString().ToLower() == "y")
                 {
+                    if (searchLocation == SearchOption.TopDirectoryOnly)
+                    {
+                        Console.WriteLine("Creating Folders ....");
+                        Application.CreateFolders(course);
+                        Console.WriteLine();
+                    }
                     Console.WriteLine("Renaming...");
                     Console.WriteLine(" » (id):new name");
                     for (int j = 0; j < origenalFilesNames.Length; j++)
@@ -137,39 +143,33 @@ namespace CoursesFileSysOrg
 
         public static void FilesRenameAndMoveByVideoLength(Course course)
         {
-            var searchLocation = SearchOption.TopDirectoryOnly;
             DirectoryInfo currentDirectory = new DirectoryInfo(GetWorkingDirectory());
-            var origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation)
-                .Where(e => fileExtensions.Contains(e.Extension.ToLower()))
-                //.OrderBy(f => TagLib.File.Create(f.FullName).Properties.Duration)
-                .ToArray();
+            FileInfo[] origenalFilesNames;
+            origenalFilesNames = Application.GetFilesinFolder(currentDirectory, SearchOption.TopDirectoryOnly, fileExtensions, null);
             if (origenalFilesNames.Length == 0)
             {
-                searchLocation = SearchOption.AllDirectories;
-                origenalFilesNames = currentDirectory.EnumerateFiles("*", searchLocation)
-                    .Where(e => fileExtensions.Contains(e.Extension.ToLower()))
-                    //.OrderBy(f => TagLib.File.Create(f.FullName).Properties.Duration)
-                    .ToArray();
+                origenalFilesNames = Application.GetFilesinFolder(currentDirectory, SearchOption.AllDirectories, fileExtensions, null);
             }
-
             VideoItem[] filesMatchIndex = new VideoItem[origenalFilesNames.Length];
             int arrayIndex = 0;
 
-            foreach (var file in origenalFilesNames)
+            foreach (FileInfo file in origenalFilesNames)
             {
-                TimeSpan fileDuration = TagLib.File.Create(file.FullName).Properties.Duration;
                 try
                 {
-                    VideoItem fileMatch = course.Chapters.SelectMany(c => c.VideoItems)
+                    TimeSpan fileDuration = TagLib.File.Create(file.FullName).Properties.Duration;
+
+                    var filesMatch = course.Chapters.SelectMany(c => c.VideoItems)
                                     .Where(x => x.TimeStamp != null
                                     && x.TimeStamp.GetMinutes() == fileDuration.Minutes.ToString()
-                                    && x.TimeStamp.GetSeconds() == fileDuration.Seconds.ToString())
-                                    .Single();
-                    filesMatchIndex[arrayIndex++] = fileMatch;
-                }
-                catch (Exception e) // "Sequence contains more than one element exception" OR "Sequence contains no elements"
-                {
+                                    && x.TimeStamp.GetSeconds() == fileDuration.Seconds.ToString());
+                    if (filesMatch.Count() == 1)
+                        filesMatchIndex[arrayIndex] = filesMatch.SingleOrDefault();
                     arrayIndex++;
+                }
+                catch (TagLib.CorruptFileException e)
+                {
+                    Console.WriteLine($"File {file.Name} is Corrupt");
                 }
             }
 
@@ -178,6 +178,14 @@ namespace CoursesFileSysOrg
                 Console.WriteLine("no files fonud!...");
                 return;
             }
+            if (ConfirmePrintedFilesToRename(course, origenalFilesNames, filesMatchIndex))
+            {
+                RenameAndMoveFiles(course, origenalFilesNames, filesMatchIndex);
+            }
+        }
+
+        private static Boolean ConfirmePrintedFilesToRename(Course course, FileInfo[] origenalFilesNames, VideoItem[] filesMatchIndex)
+        {
             int fromLength = (origenalFilesNames.Length > 0) ? origenalFilesNames.Max(x => x.Name.Length) : 0;
             // 2---> the two quotation marks
             Console.WriteLine("{0,-" + (fromLength + 2) + "} {1}", "From Name:", "To Name:");
@@ -193,31 +201,45 @@ namespace CoursesFileSysOrg
                         string.Empty, // header place holder
                         filesMatchIndex[i].GetFormatedFileName(course.GetChaptersNumOfDigits),
                         origenalFilesNames[i].Extension);
-                Console.WriteLine("[{0}]--->[{1}]", 
+                Console.WriteLine("[{0}]--->[{1}]",
                         TagLib.File.Create(origenalFilesNames[i].FullName).Properties.Duration.ToString().Substring(3, 5),
                         filesMatchIndex[i].TimeStamp);
             }
             Console.WriteLine("Continue... (Y/n)");
             var getConfirmationKey = Console.ReadKey();
-            Console.WriteLine();
             if (getConfirmationKey.KeyChar == 13 || getConfirmationKey.KeyChar.ToString().ToLower() == "y")
+                return true;
+            else
+                return false;
+        }
+
+        private static void RenameAndMoveFiles(Course course, FileInfo[] origenalFilesNames, VideoItem[] filesMatchIndex)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Renaming...");
+            Console.WriteLine(" » (id):new name");
+            for (int j = 0; j < origenalFilesNames.Length; j++)
             {
-                Console.WriteLine("Renaming...");
-                Console.WriteLine(" » (id):new name");
-                for (int j = 0; j < origenalFilesNames.Length; j++)
-                {
-                    if (filesMatchIndex[j] == null)
-                        continue;
+                if (filesMatchIndex[j] == null)
+                    continue;
 
-                    var fullFilePath = origenalFilesNames[j].DirectoryName + "\\";
+                var fullFilePath = origenalFilesNames[j].DirectoryName + "\\";
 
-                    Console.WriteLine(" » {0,3}: {1}{2}{3}", j + 1,
-                    fullFilePath, filesMatchIndex[j].GetFormatedFileName(course.GetChaptersNumOfDigits), origenalFilesNames[j].Extension);
+                Console.WriteLine(" » {0,3}: {1}{2}{3}", j + 1,
+                fullFilePath, filesMatchIndex[j].GetFormatedFileName(course.GetChaptersNumOfDigits), origenalFilesNames[j].Extension);
 
-                    origenalFilesNames[j].MoveTo(string.Format("{0}{1}{2}",
-                        fullFilePath, filesMatchIndex[j].GetFormatedFileName(course.GetChaptersNumOfDigits), origenalFilesNames[j].Extension));
-                }
+                origenalFilesNames[j].MoveTo(string.Format("{0}{1}{2}",
+                    fullFilePath, filesMatchIndex[j].GetFormatedFileName(course.GetChaptersNumOfDigits), origenalFilesNames[j].Extension));
             }
+        }
+
+        private static FileInfo[] GetFilesinFolder(DirectoryInfo currentDirectory, SearchOption searchLocation, string[] fileExtensions, Func<FileInfo, double> orderBy)
+        {
+            IEnumerable<FileInfo> filesInfo = currentDirectory.EnumerateFiles("*", searchLocation)
+                                    .Where(e => fileExtensions.Contains(e.Extension.ToLower()));
+            if (orderBy != null)
+                filesInfo = filesInfo.OrderBy(orderBy);
+            return filesInfo.ToArray();
         }
 
         public static void DisplayMetadata(Course course)

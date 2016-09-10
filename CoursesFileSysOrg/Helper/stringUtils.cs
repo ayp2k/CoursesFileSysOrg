@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
@@ -48,10 +49,11 @@ namespace CoursesFileSysOrg
         {
             double result;
             List<string> subResults = new List<string>();
+            NumberFormatInfo nfi = System.Globalization.NumberFormatInfo.InvariantInfo;
 
-            foreach (var subName in name.Split(new char[] { ' ', '_', '-', '.', '(', ')' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var subName in name.Split(new char[] { ' ', '_', '-', '.', '(', ')', ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (double.TryParse(subName, out result))
+                if (nfi.NaNSymbol != subName && double.TryParse(subName, out result))
                 {
                     //return result;
                     subResults.Add(subName);

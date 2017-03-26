@@ -2,6 +2,8 @@
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
 using System.Threading.Tasks;
+using System.Net;
+using AngleSharp.Dom.Html;
 
 namespace CoursesFileSysOrg
 {
@@ -49,6 +51,9 @@ namespace CoursesFileSysOrg
                 case "prenticehall":
                 case "informit":
                     return new LiveLessons();
+                case "packt":
+                case "packtpub":
+                    return new Packt();
                 default:
                     return null;
             }
@@ -60,5 +65,25 @@ namespace CoursesFileSysOrg
         internal abstract string GetCourseMetaDataDescription();
         internal abstract List<string> GetCourseMetaDataCategories();
 
+        internal string GetCourseURL(string courseName)
+        {
+            return SearchURL.Replace(QueryPlaceHolder, WebUtility.UrlEncode(courseName));
+        }
+
+        internal IHtmlDocument GetDomObjectFromSourceHtml(string sourceHtml)
+        {
+            return domParser.Parse(sourceHtml);
+        }
+
+        internal async Task<IHtmlDocument> GetDomObjectFromSiteUrlAsync(string siteUrl)
+        {
+            var SearchPageHTML = await WebUtils.GetWebContentAsync(siteUrl);
+            return await domParser.ParseAsync(SearchPageHTML);
+        }
+
+        internal IHtmlDocument GetDomObjectFromSiteUrl(string siteUrl)
+        {
+            return GetDomObjectFromSiteUrlAsync(siteUrl).Result;
+        }
     }
 }

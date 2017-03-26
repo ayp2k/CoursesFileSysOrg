@@ -6,20 +6,25 @@ using System.Linq;
 namespace CoursesFileSysOrg
 {
     [DebuggerDisplay("{id}", Name = "{Name}")]
-    internal class Course
+    class Course
     {
         public string id { get; set; }
         public string Name { get; internal set; }
         public string URL { get; internal set; }
-        public string Description { get; set; }
-        public List<string> Categories { get; set; }
         public List<Chapter> Chapters { get; set; }
+        public string Description { get; set; }
+        public string PublicationDate { get; set; }
+        public string MainCategory { get; set; }
+        public List<string> Categories { get; set; }
+        public List<string> Tags { get; set; }
 
         private string webPageHTML;
 
         public Course()
         {
             Chapters = new List<Chapter>();
+            Categories = new List<string>();
+            Tags = new List<string>();
         }
 
         public string GetWebPageHTML
@@ -70,12 +75,7 @@ namespace CoursesFileSysOrg
         {
             if (this.URL != null || this.URL != string.Empty)
             {
-                using (WebClient client = new WebClient())
-                {
-                    client.Headers["User-Agent"] = Publisher.UserAgent;
-                    client.Encoding = System.Text.Encoding.GetEncoding("utf-8");
-                    webPageHTML = client.DownloadString(this.URL);
-                }
+                webPageHTML = WebUtils.GetWebContentAsync(this.URL).Result;
             }
         }
     }

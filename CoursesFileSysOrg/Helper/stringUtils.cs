@@ -63,34 +63,5 @@ namespace CoursesFileSysOrg
                 return double.Parse(subResults[0] + '.' + string.Join("", subResults.Skip(1)));
             return 1;
         }
-
-        public static string SerializeJSON<T>(this T obj)
-        {
-            if (obj == null)
-                throw new NullReferenceException();
-
-            string retVal;
-            using (MemoryStream ms = new MemoryStream())
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-                serializer.WriteObject(ms, obj);
-                retVal = Encoding.UTF8.GetString(ms.ToArray());
-            }
-            return retVal;
-        }
-        
-        public static T DeserializeJSON<T>(this string json)
-        {
-            if (json == null)
-                throw new NullReferenceException();
-
-            T obj = Activator.CreateInstance<T>();
-            using (MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(json)))
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-                obj = (T)serializer.ReadObject(ms);
-            }
-            return obj;
-        }
     }
 }

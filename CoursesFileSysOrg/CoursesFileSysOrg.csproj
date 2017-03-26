@@ -91,22 +91,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="DataMembers\APIresultData\PluralsightSearchResults.cs" />
-    <Compile Include="DataMembers\APIresultData\UdemyCourseResult.cs" />
-    <Compile Include="DataMembers\APIresultData\UdemySearchResults.cs" />
+    <Compile Include="DataMembers\APIresultData\Course\PacktCourseResult.cs" />
+    <Compile Include="DataMembers\APIresultData\Metadata\PacktCourceMetadataResult.cs" />
+    <Compile Include="DataMembers\APIresultData\Search\PluralsightSearchResults.cs" />
+    <Compile Include="DataMembers\APIresultData\Course\UdemyCourseResult.cs" />
+    <Compile Include="DataMembers\APIresultData\Search\UdemySearchResults.cs" />
     <Compile Include="DataMembers\Chapter.cs" />
     <Compile Include="DataMembers\Course.cs" />
-    <Compile Include="DataMembers\Publishers\InfiniteSkills.cs" />
-    <Compile Include="DataMembers\Publishers\LiveLessons.cs" />
-    <Compile Include="DataMembers\Publishers\Lynda.cs" />
-    <Compile Include="DataMembers\Publishers\Pluralsight.cs" />
+    <Compile Include="DataMembers\MetaData.cs" />
+    <Compile Include="PublishersAdapters\InfiniteSkills.cs" />
+    <Compile Include="PublishersAdapters\LiveLessons.cs" />
+    <Compile Include="PublishersAdapters\Lynda.cs" />
+    <Compile Include="PublishersAdapters\Packt.cs" />
+    <Compile Include="PublishersAdapters\Pluralsight.cs" />
+    <Compile Include="Helper\WebUtils.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataMembers\Publisher.cs" />
     <Compile Include="Helper\StringUtils.cs" />
-    <Compile Include="DataMembers\Publishers\Udemy.cs" />
-    <Compile Include="DataMembers\Publishers\TutsPlus.cs" />
+    <Compile Include="PublishersAdapters\Udemy.cs" />
+    <Compile Include="PublishersAdapters\TutsPlus.cs" />
     <Compile Include="DataMembers\VideoItem.cs" />
   </ItemGroup>
   <ItemGroup>
